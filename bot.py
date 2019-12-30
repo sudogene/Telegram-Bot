@@ -11,8 +11,8 @@ def ch_wiki(query, chat_id, long=False):
             bot.sendMessage(chat_id, wikipedia.summary(query, sentences=10))
         else:
             bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2))
-    except Exception as ex:
-        bot.sendMessage(chat_id, str(ex))
+    except Exception:
+        bot.sendMessage(chat_id, "Oops, please try again!")
         
 def cat():
     contents = requests.get('https://api.thecatapi.com/v1/images/search').json()
@@ -42,12 +42,12 @@ def ch_weather(chat_id, city='Singapore'):
         curr_hum = data['humidity']
         desc = r['weather'][0]['description']
 
-        ch_response = city + "\n\n" + \
+        ch_response = f"*{city.capitalize()}*\n\n" + \
                       f"Temperature: {curr_temp} \u2103\n" + \
-                      f"Pressure: {curr_pres} hpa\n" + \
+                      f"Pressure: {curr_pres} hPa\n" + \
                       f"Humidity: {curr_hum} %\n" + \
                       f"Description: {desc}"
-        bot.sendMessage(chat_id, ch_response)
+        bot.sendMessage(chat_id, ch_response, parse_mode='Markdown')
     else:
         bot.sendMessage(chat_id, "Oops, please try again!")
 
@@ -58,11 +58,18 @@ def ch_define(chat_id, query):
     url = "https://od-api.oxforddictionaries.com/api/v2/" + endpoint + "/" + language_code + "/" + query.lower()
     r = requests.get(url, headers = {"app_id": od_app_id, "app_key": od_key})
     if r.status_code == 200:
-        definitions = r.json()['results'][0]['lexicalEntries'][0]['entries'][0]['senses'][0]['definitions']
-        ch_response = query.lower() + "\n"
-        for d in definitions:
-            ch_response += d + "\n"
-        bot.sendMessage(chat_id, ch_response.rstrip())
+        senses = r.json()['results'][0]['lexicalEntries'][0]['entries'][0]['senses']
+        definitions = [senses[i]['definitions'] for i in range(len(senses))]
+        query_formatted = query.lower().capitalize()
+        ch_response = f"*{query_formatted}*\n\n"
+        if len(definitions) > 1:
+            count = 1
+            for d in definitions:
+                ch_response += f"{str(count)}. {d[0].capitalize()}\n\n"
+                count += 1
+        else:
+            ch_response += f"{definitions[0][0].capitalize()}\n\n"
+        bot.sendMessage(chat_id, ch_response.rstrip(), parse_mode='Markdown')
     else:
         bot.sendMessage(chat_id, "Oop, please try again!")
     
@@ -139,13 +146,21 @@ def command_handle(text, chat_id, msg):
 
 def admin_handle(text):
     # ANNOYING TOGGLE
-    if text[0] == 'ann':
-        global annoying
+    if text[0] == 'annoy':
+        global annoy_mode
         if text[1] == 'off':
-            annoying = False
+            annoy_mode = False
         elif text[1] == 'on':
-            annoying = True
-        print("Annoying has been set to:", annoying)
+            annoy_mode = True
+        print("annoy_mode has been set to:", annoy_mode)
+    # TWSS TOGGLE
+    elif text[0] == 'twss':
+        global twss_mode
+        if text[1] == 'off':
+            twss_mode = False
+        elif text[1] == 'on':
+            twss_mode = True
+        print("twss_mode has been set to:", twss_mode)
 
 
 def handle(msg):
@@ -172,19 +187,19 @@ def handle(msg):
             bot.sendMessage(chat_id, random.choice(intro))
         
         # ANNOYING MODE
-        elif annoying:
+        elif annoy_mode:
             # OVER-GREET
             if any(word in greets for word in text.lower().split()):
                 bot.sendMessage(chat_id, random.choice(intro))
-            # THATS WHAT SHE SAID
-            elif set(text.lower().split()).intersection(twss):
-                bot.sendMessage(chat_id, "That's what she said")
             # CAT
             elif 'cat' in text.lower():
                 bot.sendPhoto(chat_id, cat(), caption=random.choice(captions))
             # DOG
             elif 'dog' in text.lower():
                 bot.sendPhoto(chat_id, dog(), caption=random.choice(captions))
+        # TWSS MODE
+        elif twss_mode and set(text.lower().split()).intersection(twss):
+            bot.sendMessage(chat_id, "That's what she said.")
         
     else:
         print()
@@ -196,7 +211,7 @@ def handle(msg):
 bot = telepot.Bot(token)
 MessageLoop(bot, handle).run_as_thread()
 print('Initialised.')
-annoying = False
+annoy_mode = False
+twss_mode = True
 while 1:
-    time.sleep(10)
-
+    time.sleep(30)
