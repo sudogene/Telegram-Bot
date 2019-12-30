@@ -8,7 +8,7 @@ import wikipedia
 def wiki(query, chat_id, long=False):
     try:
         if long:
-            bot.sendMessage(chat_id, wikipedia.summary(query))
+            bot.sendMessage(chat_id, wikipedia.summary(query, sentences=10))
         else:
             bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2))
     except Exception as ex:
@@ -127,7 +127,14 @@ def command_handle(text, chat_id, msg):
     elif text[0] == 'define' and len(text) > 1:
         query = ' '.join(text[1:])
         ch_define(chat_id, query)
-
+        
+    # CAT
+    elif text[0] == 'cat':
+        bot.sendPhoto(chat_id, cat(), caption=random.choice(captions))
+        
+    # DOG
+    elif text[0] == 'dog':
+        bot.sendPhoto(chat_id, dog(), caption=random.choice(captions))
 
 
 def admin_handle(text):
@@ -154,31 +161,33 @@ def handle(msg):
         if text.startswith('/'):
             command_handle(text[1:].split(), chat_id, msg)
             return
+        
         # ADMIN COMMANDS
         elif text.startswith('!'):
             admin_handle(text[1:].split())
             return
-        
-        # CAT
-        elif 'cat' in text.lower():
-            bot.sendPhoto(chat_id, cat(), caption=random.choice(captions))
-        # DOG
-        elif 'dog' in text.lower():
-            bot.sendPhoto(chat_id, dog(), caption=random.choice(captions))
-        
-        elif set(text.lower().split()).intersection(twss):
-            bot.sendMessage(chat_id, "That's what she said")
 
         # GREETINGS
         elif 'teb' in text.lower():
             bot.sendMessage(chat_id, random.choice(intro))
+        
+        # ANNOYING MODE
         elif annoying:
+            # OVER-GREET
             if any(word in greets for word in text.lower().split()):
                 bot.sendMessage(chat_id, random.choice(intro))
+            # THATS WHAT SHE SAID
+            elif set(text.lower().split()).intersection(twss):
+                bot.sendMessage(chat_id, "That's what she said")
+            # CAT
+            elif 'cat' in text.lower():
+                bot.sendPhoto(chat_id, cat(), caption=random.choice(captions))
+            # DOG
+            elif 'dog' in text.lower():
+                bot.sendPhoto(chat_id, dog(), caption=random.choice(captions))
         
     else:
         print()
-
 
 
 
