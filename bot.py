@@ -5,7 +5,7 @@ from data import *
 import wikipedia
 
 
-def wiki(query, chat_id, long=False):
+def ch_wiki(query, chat_id, long=False):
     try:
         if long:
             bot.sendMessage(chat_id, wikipedia.summary(query, sentences=10))
@@ -107,9 +107,9 @@ def command_handle(text, chat_id, msg):
 
     # WIKI
     elif text[0] == 'wiki':
-        wiki(" ".join(text[1:]), chat_id)
+        ch_wiki(" ".join(text[1:]), chat_id)
     elif text[0] == 'wikilong':
-        wiki(" ".join(text[1:]), chat_id, long=True)
+        ch_wiki(" ".join(text[1:]), chat_id, long=True)
 
     # CAP CALCULATOR
     elif text[0] == 'cap':
