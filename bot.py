@@ -1,25 +1,28 @@
-import telepot, requests, re, random, time, json
+import telepot, requests, re, random, time, urllib3
 from telepot.loop import MessageLoop
 from datetime import datetime as dt
 from data import *
 import wikipedia
 
 
-def ch_wiki(query, chat_id, long=False):
+def ch_wiki(query, chat_id, msg_id, long=False):
     try:
         if long:
-            bot.sendMessage(chat_id, wikipedia.summary(query, sentences=10))
+            bot.sendMessage(chat_id, wikipedia.summary(query, sentences=8),
+                            reply_to_message_id=msg_id)
         else:
-            bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2))
+            bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2),
+                            reply_to_message_id=msg_id)
     except Exception:
-        bot.sendMessage(chat_id, "Oops, please try again!")
-        
+        bot.sendMessage(chat_id, "Oops, please try again!",
+                        reply_to_message_id=msg_id)
+
 def cat():
     contents = requests.get('https://api.thecatapi.com/v1/images/search').json()
     return contents[0]['url']
 
 def dog_helper():
-    contents = requests.get('https://random.dog/woof.json').json()    
+    contents = requests.get('https://random.dog/woof.json').json()
     url = contents['url']
     return url
 
@@ -31,7 +34,7 @@ def dog():
         file_extension = re.search("([^.]*)$",url).group(1).lower()
     return url
 
-def ch_weather(chat_id, city='Singapore'):
+def ch_weather(chat_id, msg_id, city='Singapore'):
     # using openweathermap.org API
     url = "https://api.openweathermap.org/data/2.5/weather?q={}&units=metric&appid={}".format(city, w_key)
     r = requests.get(url).json()
@@ -47,11 +50,13 @@ def ch_weather(chat_id, city='Singapore'):
                       f"Pressure: {curr_pres} hPa\n" + \
                       f"Humidity: {curr_hum} %\n" + \
                       f"Description: {desc}"
-        bot.sendMessage(chat_id, ch_response, parse_mode='Markdown')
+        bot.sendMessage(chat_id, ch_response, parse_mode='Markdown',
+                        reply_to_message_id=msg_id)
     else:
-        bot.sendMessage(chat_id, "Oops, please try again!")
+        bot.sendMessage(chat_id, "Oops, please try again!",
+                        reply_to_message_id=msg_id)
 
-def ch_define(chat_id, query):
+def ch_define(chat_id, query, msg_id):
     # using Oxford Dictionaries API
     endpoint = "entries"
     language_code = "en-us"
@@ -69,12 +74,14 @@ def ch_define(chat_id, query):
                 count += 1
         else:
             ch_response += f"{definitions[0][0].capitalize()}\n\n"
-        bot.sendMessage(chat_id, ch_response.rstrip(), parse_mode='Markdown')
+        bot.sendMessage(chat_id, ch_response.rstrip(), parse_mode='Markdown',
+                        reply_to_message_id=msg_id)
     else:
-        bot.sendMessage(chat_id, "Oop, please try again!")
-    
+        bot.sendMessage(chat_id, "Oop, please try again!",
+                        reply_to_message_id=msg_id)
 
-def ch_cap(grades, chat_id, msg):
+
+def ch_cap(grades, chat_id, msg, msg_id):
     denom = 0
     try:
         for i in range(len(grades)):
@@ -84,17 +91,19 @@ def ch_cap(grades, chat_id, msg):
             grades[i] = int(grades[i]) * g_scores[i]
         total = sum(grades)
         cap = round(total/denom, 2)
-        target = get_user(msg['from']['id'])
-        bot.sendMessage(chat_id, target + "'s CAP: " + str(cap))
+        #target = get_user(msg['from']['id'])
+        bot.sendMessage(chat_id, "CAP: " + str(cap),
+                        reply_to_message_id=msg_id)
     except:
-        bot.sendMessage(chat_id, "Sorry, invalid input!")
+        bot.sendMessage(chat_id, "Sorry, invalid input!",
+                        reply_to_message_id=msg_id)
 
 def get_user(uid):
     return bot.getChat(uid)['first_name']
 
-def command_handle(text, chat_id, msg):
+def command_handle(text, chat_id, msg, msg_id):
     # HELP
-    if text[0] == 'help':
+    if text[0] == 'help' or text[0] == 'help@tebby_bot':
         response = "tebby lives to serve:\n"
         for cmd in avail_cmd:
             response += cmd + "\n"
@@ -102,8 +111,9 @@ def command_handle(text, chat_id, msg):
 
     # 8BALL
     elif text[0] == '8ball' and len(text) > 1:
-        bot.sendMessage(chat_id, random.choice(ball_response))
-    
+        bot.sendMessage(chat_id, random.choice(ball_response),
+                        reply_to_message_id=msg_id)
+
     # SLAP
     elif text[0] == 'slap':
         if len(text) > 1:
@@ -114,34 +124,36 @@ def command_handle(text, chat_id, msg):
 
     # WIKI
     elif text[0] == 'wiki':
-        ch_wiki(" ".join(text[1:]), chat_id)
+        ch_wiki(" ".join(text[1:]), chat_id, msg_id)
     elif text[0] == 'wikilong':
-        ch_wiki(" ".join(text[1:]), chat_id, long=True)
+        ch_wiki(" ".join(text[1:]), chat_id, msg_id, long=True)
 
     # CAP CALCULATOR
     elif text[0] == 'cap':
         grades = list(map(int, list(text[1:])))
-        ch_cap(grades, chat_id, msg)
-    
+        ch_cap(grades, chat_id, msg, msg_id)
+
     # WEATHER
     elif text[0] == 'weather':
         if len(text) > 1:
-            ch_weather(chat_id, ' '.join(text[1:]))
+            ch_weather(chat_id, msg_id, ' '.join(text[1:]))
         else:
-            ch_weather(chat_id)
+            ch_weather(chat_id, msg_id)
 
     # DEFINITION
     elif text[0] == 'define' and len(text) > 1:
         query = ' '.join(text[1:])
-        ch_define(chat_id, query)
-        
+        ch_define(chat_id, query, msg_id)
+
     # CAT
     elif text[0] == 'cat':
-        bot.sendPhoto(chat_id, cat(), caption=random.choice(captions))
-        
+        bot.sendPhoto(chat_id, cat(), caption=random.choice(captions),
+                      reply_to_message_id=msg_id)
+
     # DOG
     elif text[0] == 'dog':
-        bot.sendPhoto(chat_id, dog(), caption=random.choice(captions))
+        bot.sendPhoto(chat_id, dog(), caption=random.choice(captions),
+                      reply_to_message_id=msg_id)
 
 
 def admin_handle(text):
@@ -165,18 +177,20 @@ def admin_handle(text):
 
 def handle(msg):
     content_type, chat_type, chat_id = telepot.glance(msg)
+    msg_id = telepot.message_identifier(msg)[1]
     print(dt.now().strftime("%H:%M:%S"), content_type, chat_type, chat_id, end=' ')
 
     if content_type == 'text':
         text = msg['text']
         uid = msg['from']['id']
-        print("{user} : {msg}".format(user=get_user(uid), msg=text))
+        print(get_user(uid))
+        #print("{user} : {msg}".format(user=get_user(uid), msg=text))
 
         # COMMANDS
         if text.startswith('/'):
-            command_handle(text[1:].split(), chat_id, msg)
+            command_handle(text[1:].split(), chat_id, msg, msg_id)
             return
-        
+
         # ADMIN COMMANDS
         elif text.startswith('!'):
             admin_handle(text[1:].split())
@@ -185,7 +199,7 @@ def handle(msg):
         # GREETINGS
         elif 'teb' in text.lower():
             bot.sendMessage(chat_id, random.choice(intro))
-        
+
         # ANNOYING MODE
         elif annoy_mode:
             # OVER-GREET
@@ -200,17 +214,15 @@ def handle(msg):
         # TWSS MODE
         elif twss_mode and set(text.lower().split()).intersection(twss):
             bot.sendMessage(chat_id, "That's what she said.")
-        
+
     else:
         print()
-
-
 
 
 # Main loop runs here
 bot = telepot.Bot(token)
 MessageLoop(bot, handle).run_as_thread()
-print('Initialised.')
+print('Bot initialized :)')
 annoy_mode = False
 twss_mode = True
 while 1:
