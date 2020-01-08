@@ -3,6 +3,8 @@ from telepot.loop import MessageLoop
 from datetime import datetime as dt
 from data import *
 import wikipedia
+from bs4 import BeautifulSoup
+import wordninja
 
 
 def ch_wiki(query, chat_id, msg_id, long=False):
@@ -17,14 +19,17 @@ def ch_wiki(query, chat_id, msg_id, long=False):
         bot.sendMessage(chat_id, "Oops, please try again!",
                         reply_to_message_id=msg_id)
 
+
 def cat():
     contents = requests.get('https://api.thecatapi.com/v1/images/search').json()
     return contents[0]['url']
+
 
 def dog_helper():
     contents = requests.get('https://random.dog/woof.json').json()
     url = contents['url']
     return url
+
 
 def dog():
     allowed_extension = ['jpg','jpeg','png']
@@ -33,6 +38,7 @@ def dog():
         url = dog_helper()
         file_extension = re.search("([^.]*)$",url).group(1).lower()
     return url
+
 
 def ch_weather(chat_id, msg_id, city='Singapore'):
     # using openweathermap.org API
@@ -55,6 +61,50 @@ def ch_weather(chat_id, msg_id, city='Singapore'):
     else:
         bot.sendMessage(chat_id, "Oops, please try again!",
                         reply_to_message_id=msg_id)
+
+
+def ch_transit(chat_id, msg_id, origin, destination):
+    o = origin.replace(' ', '+')
+    d = destination.replace(' ', '+')
+    base_url = 'https://maps.googleapis.com/maps/api/directions/json?'
+    mode = 'transit'
+    api_key = gm_key
+    nav_request = f"origin={o}&destination={d}&mode={mode}&key={api_key}"
+    response = requests.get(base_url + nav_request).json()
+    if response['status'] != 'OK':
+        bot.sendMessage(chat_id, "Oops, please refine your search!",
+                        reply_to_message_id=msg_id)
+        return
+
+    routes = response['routes'][0]
+    ch_response = f"Duration: {routes['legs'][0]['duration']['text']}\n"
+    step = 1
+    for r in routes['legs'][0]['steps']:
+        ch_response += f"\n{step}. {r['html_instructions']}"
+        if r['travel_mode'] == 'TRANSIT':
+            ch_response += f"\n - Alight at {r['transit_details']['arrival_stop']['name']}"
+        elif r['travel_mode'] == 'WALKING':
+            sub_r = r['steps']
+            for s in sub_r:
+                if 'html_instructions' in s.keys():
+                    text = BeautifulSoup(s['html_instructions'], features='html.parser').get_text()
+                    # fuck you html
+                    raw_text = text.split(' ')
+                    processed_text = []
+                    for i in range(len(raw_text)):
+                        if "Destination" in raw_text[i] or "Take" in raw_text[i]:
+                            processed_text.append(' '.join(wordninja.split(raw_text[i])))
+                        else:
+                            processed_text.append(raw_text[i])
+
+                    text = ' '.join(processed_text)
+                    # text = ' '.join(wordninja.split(text))
+                    ch_response += f"\n - {text}"
+        ch_response += '\n'
+        step += 1
+
+    bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id)
+
 
 def ch_define(chat_id, query, msg_id):
     # using Oxford Dictionaries API
@@ -98,24 +148,26 @@ def ch_cap(grades, chat_id, msg, msg_id):
         bot.sendMessage(chat_id, "Sorry, invalid input!",
                         reply_to_message_id=msg_id)
 
+
 def get_user(uid):
     return bot.getChat(uid)['first_name']
 
-def command_handle(text, chat_id, msg, msg_id):
+
+def command_handle(chat_id, msg, msg_id, cmd, text=''):
     # HELP
-    if text[0] == 'help' or text[0] == 'help@tebby_bot':
+    if cmd == 'help' or cmd == 'help@tebby_bot':
         response = "tebby lives to serve:\n"
-        for cmd in avail_cmd:
-            response += cmd + "\n"
+        for c in avail_cmd:
+            response += c + "\n"
         bot.sendMessage(chat_id, response.rstrip())
 
     # 8BALL
-    elif text[0] == '8ball' and len(text) > 1:
+    elif cmd == '8ball' and text:
         bot.sendMessage(chat_id, random.choice(ball_response),
                         reply_to_message_id=msg_id)
 
     # SLAP
-    elif text[0] == 'slap':
+    elif cmd == 'slap':
         if len(text) > 1:
             target = " ".join(text[1:])
         else:
@@ -123,35 +175,44 @@ def command_handle(text, chat_id, msg, msg_id):
         bot.sendMessage(chat_id, target + " " + random.choice(slap))
 
     # WIKI
-    elif text[0] == 'wiki':
-        ch_wiki(" ".join(text[1:]), chat_id, msg_id)
-    elif text[0] == 'wikilong':
-        ch_wiki(" ".join(text[1:]), chat_id, msg_id, long=True)
+    elif cmd == 'wiki' and text:
+        ch_wiki(text, chat_id, msg_id)
+    elif cmd == 'wikilong' and text:
+        ch_wiki(text, chat_id, msg_id, long=True)
 
     # CAP CALCULATOR
-    elif text[0] == 'cap':
-        grades = list(map(int, list(text[1:])))
+    elif cmd == 'cap':
+        grades = list(map(int, list(text)))
         ch_cap(grades, chat_id, msg, msg_id)
 
     # WEATHER
-    elif text[0] == 'weather':
-        if len(text) > 1:
-            ch_weather(chat_id, msg_id, ' '.join(text[1:]))
+    elif cmd == 'weather':
+        if text:
+            ch_weather(chat_id, msg_id, text)
         else:
             ch_weather(chat_id, msg_id)
 
+    # DIRECTIONS - TRANSIT
+    elif cmd == 'transit':
+        origin, destination = text.split(' ; ')
+        if not origin or not destination:
+            bot.sendMessage(chat_id, "Oops, please try again!",
+                            reply_to_message_id=msg_id)
+        else:
+            ch_transit(chat_id, msg_id, origin, destination)
+
     # DEFINITION
-    elif text[0] == 'define' and len(text) > 1:
-        query = ' '.join(text[1:])
+    elif cmd == 'define' and text:
+        query = text
         ch_define(chat_id, query, msg_id)
 
     # CAT
-    elif text[0] == 'cat':
+    elif cmd == 'cat':
         bot.sendPhoto(chat_id, cat(), caption=random.choice(captions),
                       reply_to_message_id=msg_id)
 
     # DOG
-    elif text[0] == 'dog':
+    elif cmd == 'dog':
         bot.sendPhoto(chat_id, dog(), caption=random.choice(captions),
                       reply_to_message_id=msg_id)
 
@@ -188,7 +249,11 @@ def handle(msg):
 
         # COMMANDS
         if text.startswith('/'):
-            command_handle(text[1:].split(), chat_id, msg, msg_id)
+            lst = text[1:].split(' ')
+            if len(lst) > 1:
+                command_handle(chat_id, msg, msg_id, lst[0], ' '.join(lst[1:]))
+            else:
+                command_handle(chat_id, msg, msg_id, lst[0])
             return
 
         # ADMIN COMMANDS
