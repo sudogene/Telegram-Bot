@@ -78,11 +78,17 @@ def ch_transit(chat_id, msg_id, origin, destination):
 
     routes = response['routes'][0]
     ch_response = f"Duration: {routes['legs'][0]['duration']['text']}\n"
+    ch_response += f"Distance: {routes['legs'][0]['distance']['text']}\n"
     step = 1
     for r in routes['legs'][0]['steps']:
-        ch_response += f"\n{step}. {r['html_instructions']}"
+        ch_response += f"\n{step}. {r['html_instructions']} ({r['distance']['text']})"
         if r['travel_mode'] == 'TRANSIT':
-            ch_response += f"\n - Alight at {r['transit_details']['arrival_stop']['name']}"
+            td = r['transit_details']
+            arr = td['arrival_stop']['name']
+            if td['line']['vehicle']['type'] == 'SUBWAY':
+                ch_response += f"\n - Alight at {arr} ({td['line']['name']}, {td['num_stops']} stop)"
+            elif td['line']['vehicle']['type'] == 'BUS':
+                ch_response += f"\n - Alight at {arr} (Bus {td['line']['name']}, {td['num_stops']} stop)"
         elif r['travel_mode'] == 'WALKING':
             sub_r = r['steps']
             for s in sub_r:
@@ -99,7 +105,7 @@ def ch_transit(chat_id, msg_id, origin, destination):
 
                     text = ' '.join(processed_text)
                     # text = ' '.join(wordninja.split(text))
-                    ch_response += f"\n - {text}"
+                    ch_response += f"\n - {text} ({s['distance']['text']})"
         ch_response += '\n'
         step += 1
 
@@ -169,7 +175,7 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
     # SLAP
     elif cmd == 'slap':
         if len(text) > 1:
-            target = " ".join(text[1:])
+            target = text
         else:
             target = get_user(msg['from']['id'])
         bot.sendMessage(chat_id, target + " " + random.choice(slap))
@@ -182,7 +188,8 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
 
     # CAP CALCULATOR
     elif cmd == 'cap':
-        grades = list(map(int, list(text)))
+        grades = list(map(int, text.split(' ')))
+        print(grades)
         ch_cap(grades, chat_id, msg, msg_id)
 
     # WEATHER
@@ -234,6 +241,15 @@ def admin_handle(text):
         elif text[1] == 'on':
             twss_mode = True
         print("twss_mode has been set to:", twss_mode)
+    # ON/OFF BOT
+    elif text[0] == 'start':
+        global has_started
+        if text[1] == 'off':
+            has_started = False
+        elif text[1] == 'on':
+            has_started = True
+        print("has_started has been set to:", has_started)
+
 
 
 def handle(msg):
@@ -247,18 +263,21 @@ def handle(msg):
         print(get_user(uid))
         #print("{user} : {msg}".format(user=get_user(uid), msg=text))
 
+        # ADMIN COMMANDS
+        if text.startswith('!'):
+            admin_handle(text[1:].split())
+            return
+
+        elif not has_started:
+            return
+
         # COMMANDS
-        if text.startswith('/'):
+        elif text.startswith('/'):
             lst = text[1:].split(' ')
             if len(lst) > 1:
                 command_handle(chat_id, msg, msg_id, lst[0], ' '.join(lst[1:]))
             else:
                 command_handle(chat_id, msg, msg_id, lst[0])
-            return
-
-        # ADMIN COMMANDS
-        elif text.startswith('!'):
-            admin_handle(text[1:].split())
             return
 
         # GREETINGS
@@ -284,11 +303,27 @@ def handle(msg):
         print()
 
 
+
+# You can leave this bit out if you're using a paid PythonAnywhere account
+proxy_url = "http://proxy.server:3128"
+telepot.api._pools = {
+    'default': urllib3.ProxyManager(proxy_url=proxy_url, num_pools=3, maxsize=10, retries=False, timeout=30),
+}
+telepot.api._onetime_pool_spec = (urllib3.ProxyManager, dict(proxy_url=proxy_url, num_pools=1, maxsize=1, retries=False, timeout=30))
+# end of the stuff that's only needed for free accounts
+
+
+
 # Main loop runs here
+init_input = input("Process all messages? - Y/N : ")
+has_started = True if init_input.upper() == 'Y' else False
+#has_started = False
+
 bot = telepot.Bot(token)
 MessageLoop(bot, handle).run_as_thread()
 print('Bot initialized :)')
 annoy_mode = False
 twss_mode = True
+
 while 1:
     time.sleep(30)
