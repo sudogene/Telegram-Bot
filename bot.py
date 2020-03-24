@@ -154,6 +154,21 @@ def ch_cap(grades, chat_id, msg, msg_id):
         bot.sendMessage(chat_id, "Sorry, invalid input!",
                         reply_to_message_id=msg_id)
 
+def ch_roll(num_side, num_roll, chat_id, msg_id):
+    if num_roll > 100:
+        bot.sendMessage(chat_id, "Oops, too malicious!",
+                        reply_to_message_id=msg_id)
+        return
+    res = []
+    try:
+        for i in range(num_roll):
+            res.append(str(random.randint(1, num_side)))
+        ch_response = ", ".join(res)
+        bot.sendMessage(chat_id, ch_response,
+                        reply_to_message_id=msg_id)
+    except:
+        bot.sendMessage(chat_id, "Oops, too malicious!",
+                        reply_to_message_id=msg_id)
 
 def get_user(uid):
     return bot.getChat(uid)['first_name']
@@ -162,10 +177,50 @@ def get_user(uid):
 def command_handle(chat_id, msg, msg_id, cmd, text=''):
     # HELP
     if cmd == 'help' or cmd == 'help@tebby_bot':
-        response = "tebby lives to serve:\n"
+        response = "Tebby lives to serve:\n"
         for c in avail_cmd:
             response += c + "\n"
         bot.sendMessage(chat_id, response.rstrip())
+    # HELP-media
+    if cmd == 'media':
+        response = "Tebby has an assortment:\n"
+        for c in avail_media:
+            response += c + "\n"
+        bot.sendMessage(chat_id, response.rstrip())
+
+    # MEDIA
+    elif cmd == 'bbygurl':
+        bot.sendVoice(chat_id, open('babygurl.mp3', 'rb'))
+    elif cmd == 'yahh':
+        bot.sendVoice(chat_id, open('yah.mp3', 'rb'))
+    elif cmd == 'ted':
+        bot.sendVoice(chat_id, open('tedtalk.mp3', 'rb'))
+    elif cmd == 'ring':
+        bot.sendVoice(chat_id, open('skype.mp3', 'rb'))
+    elif cmd == 'shober':
+        bot.sendVideo(chat_id, open('shober.mp4', 'rb'))
+    elif cmd == 'dolphon':
+        bot.sendVoice(chat_id, open('dolphin.mp3', 'rb'))
+
+    # DICE ROLL
+    elif cmd == 'roll':
+        if text:
+            try:
+                lst_text = map(int, text.split(' ')[:2])
+                num_side, num_roll = lst_text
+                if num_side < 1 or num_roll < 1:
+                    raise Exception
+            except:
+                bot.sendMessage(chat_id, "Oops, invalid input!",
+                                reply_to_message_id=msg_id)
+                return
+        else:
+            num_side = 6
+            num_roll = 1
+        ch_roll(num_side, num_roll, chat_id, msg_id)
+
+    elif cmd == 'roll2':
+        ch_roll(6, 2, chat_id, msg_id)
 
     # 8BALL
     elif cmd == '8ball' and text:
@@ -179,6 +234,14 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
         else:
             target = get_user(msg['from']['id'])
         bot.sendMessage(chat_id, target + " " + random.choice(slap))
+
+    # AWARD
+    elif cmd == 'award':
+        if len(text) > 1:
+            target = text
+        else:
+            target = get_user(msg['from']['id'])
+        bot.sendMessage(chat_id, target + " " + random.choice(award))
 
     # WIKI
     elif cmd == 'wiki' and text:
@@ -280,6 +343,9 @@ def handle(msg):
                 command_handle(chat_id, msg, msg_id, lst[0])
             return
 
+        elif 'bruh' in text.lower():
+            bot.sendVoice(chat_id, open('bruh.mp3', 'rb'))
+
         # GREETINGS
         elif 'teb' in text.lower():
             bot.sendMessage(chat_id, random.choice(intro))
@@ -323,7 +389,7 @@ bot = telepot.Bot(token)
 MessageLoop(bot, handle).run_as_thread()
 print('Bot initialized :)')
 annoy_mode = False
-twss_mode = True
+twss_mode = False
 
 while 1:
     time.sleep(30)
