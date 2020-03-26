@@ -215,17 +215,27 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
 
     # MEDIA
     elif cmd == 'bbygurl':
-        bot.sendVoice(chat_id, open('babygurl.mp3', 'rb'))
+        bot.sendVoice(chat_id, open('babygurl.mp3', 'rb'), disable_notification=True)
     elif cmd == 'yahh':
-        bot.sendVoice(chat_id, open('yah.mp3', 'rb'))
+        bot.sendVoice(chat_id, open('yah.mp3', 'rb'), disable_notification=True)
     elif cmd == 'ted':
-        bot.sendVoice(chat_id, open('tedtalk.mp3', 'rb'))
+        bot.sendVoice(chat_id, open('tedtalk.mp3', 'rb'), disable_notification=True)
     elif cmd == 'ring':
-        bot.sendVoice(chat_id, open('skype.mp3', 'rb'))
+        bot.sendVoice(chat_id, open('skype.mp3', 'rb'), disable_notification=True)
     elif cmd == 'shober':
-        bot.sendMediaVideo(chat_id, open('shober.gif', 'rb'))
+        bot.sendDocument(chat_id, open('shober.mp4', 'rb'), disable_notification=True)
     elif cmd == 'dolphon':
-        bot.sendVoice(chat_id, open('dolphin.mp3', 'rb'))
+        bot.sendVoice(chat_id, open('dolphin.mp3', 'rb'), disable_notification=True)
+    elif cmd == 'dancin':
+        bot.sendMessage(chat_id, 'dancin till you break your bone!', disable_notification=True)
+        bot.sendDocument(chat_id, open('shober.mp4', 'rb'), disable_notification=True)
+        bot.sendVoice(chat_id, open('dancin.mp3', 'rb'), disable_notification=True)
+
+    # THIS OR THAT
+    elif cmd == 'choose' and text:
+        choices = text.split(' or ')
+        choice = random.choice(choices)
+        bot.sendMessage(chat_id, choice, reply_to_message_id=msg_id)
 
     # DICE ROLL
     elif cmd == 'roll':
