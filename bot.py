@@ -11,13 +11,13 @@ def ch_wiki(query, chat_id, msg_id, long=False):
     try:
         if long:
             bot.sendMessage(chat_id, wikipedia.summary(query, sentences=8),
-                            reply_to_message_id=msg_id)
+                            reply_to_message_id=msg_id, disable_notification=True)
         else:
             bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2),
-                            reply_to_message_id=msg_id)
+                            reply_to_message_id=msg_id, disable_notification=True)
     except Exception:
         bot.sendMessage(chat_id, "Oops, please try again!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
 
 
 def cat():
@@ -60,7 +60,32 @@ def ch_weather(chat_id, msg_id, city='Singapore'):
                         reply_to_message_id=msg_id)
     else:
         bot.sendMessage(chat_id, "Oops, please try again!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
+
+def ch_news(chat_id, msg_id, country="sg"):
+    api_key = news_key
+    url = f"http://newsapi.org/v2/top-headlines?country={country}&apiKey={api_key}&pageSize=10"
+    r = requests.get(url).json()
+
+    status = r['status']
+    if status != 'ok':
+        bot.sendMessage(chat_id, "Whoops, try again later!")
+        return
+
+    ch_response = ""
+    articles = r['articles']
+    for article in articles:
+        if article['title'].startswith("Morning Briefing:"):
+            continue
+        ch_response += "*" + article['title']  + "*\n"
+        if article['description'] != None:
+            ch_response += article['description'] + "\n\n"
+        else:
+            ch_response += "\n"
+
+    ch_response = ch_response.strip()
+    bot.sendMessage(chat_id, ch_response, parse_mode='Markdown',
+                    reply_to_message_id=msg_id, disable_notification=True)
 
 
 def ch_transit(chat_id, msg_id, origin, destination):
@@ -73,7 +98,7 @@ def ch_transit(chat_id, msg_id, origin, destination):
     response = requests.get(base_url + nav_request).json()
     if response['status'] != 'OK':
         bot.sendMessage(chat_id, "Oops, please refine your search!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
         return
 
     routes = response['routes'][0]
@@ -109,7 +134,7 @@ def ch_transit(chat_id, msg_id, origin, destination):
         ch_response += '\n'
         step += 1
 
-    bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id)
+    bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id, disable_notification=True)
 
 
 def ch_define(chat_id, query, msg_id):
@@ -131,10 +156,10 @@ def ch_define(chat_id, query, msg_id):
         else:
             ch_response += f"{definitions[0][0].capitalize()}\n\n"
         bot.sendMessage(chat_id, ch_response.rstrip(), parse_mode='Markdown',
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
     else:
         bot.sendMessage(chat_id, "Oop, please try again!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
 
 
 def ch_cap(grades, chat_id, msg, msg_id):
@@ -149,15 +174,15 @@ def ch_cap(grades, chat_id, msg, msg_id):
         cap = round(total/denom, 2)
         #target = get_user(msg['from']['id'])
         bot.sendMessage(chat_id, "CAP: " + str(cap),
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
     except:
         bot.sendMessage(chat_id, "Sorry, invalid input!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
 
 def ch_roll(num_side, num_roll, chat_id, msg_id):
     if num_roll > 100:
         bot.sendMessage(chat_id, "Oops, too malicious!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
         return
     res = []
     try:
@@ -165,10 +190,10 @@ def ch_roll(num_side, num_roll, chat_id, msg_id):
             res.append(str(random.randint(1, num_side)))
         ch_response = ", ".join(res)
         bot.sendMessage(chat_id, ch_response,
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
     except:
         bot.sendMessage(chat_id, "Oops, too malicious!",
-                        reply_to_message_id=msg_id)
+                        reply_to_message_id=msg_id, disable_notification=True)
 
 def get_user(uid):
     return bot.getChat(uid)['first_name']
@@ -180,13 +205,13 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
         response = "Tebby lives to serve:\n"
         for c in avail_cmd:
             response += c + "\n"
-        bot.sendMessage(chat_id, response.rstrip())
+        bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
     # HELP-media
     if cmd == 'media':
         response = "Tebby has an assortment:\n"
         for c in avail_media:
             response += c + "\n"
-        bot.sendMessage(chat_id, response.rstrip())
+        bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
 
     # MEDIA
     elif cmd == 'bbygurl':
@@ -198,7 +223,7 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
     elif cmd == 'ring':
         bot.sendVoice(chat_id, open('skype.mp3', 'rb'))
     elif cmd == 'shober':
-        bot.sendVideo(chat_id, open('shober.mp4', 'rb'))
+        bot.sendMediaVideo(chat_id, open('shober.gif', 'rb'))
     elif cmd == 'dolphon':
         bot.sendVoice(chat_id, open('dolphin.mp3', 'rb'))
 
@@ -212,7 +237,7 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
                     raise Exception
             except:
                 bot.sendMessage(chat_id, "Oops, invalid input!",
-                                reply_to_message_id=msg_id)
+                                reply_to_message_id=msg_id, disable_notification=True)
                 return
         else:
             num_side = 6
@@ -262,6 +287,22 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
         else:
             ch_weather(chat_id, msg_id)
 
+    # NEWS
+    elif cmd == 'news':
+        if text:
+            if text in news_valid_country:
+                ch_news(chat_id, msg_id, text)
+            else:
+                bot.sendMessage(chat_id, "Oops, here are the available countries:\n" \
+                                + "ae, ar, at, au, be, bg, br, ca, ch, cn, co, cu, cz, " \
+                                + "de, eg, fr, gb, gr, hk, hu, id, ie, il, in, " \
+                                + "it, jp, kr, lt, lv, ma, mx, my, ng, nl, no, " \
+                                + "nz, ph, pl, pt, ro, rs, ru, sa, se, sg, si, "\
+                                + "sk, th, tr, tw, ua, us, ve, za",
+                                reply_to_message_id=msg_id, disable_notification=True)
+        else:
+            ch_news(chat_id, msg_id)
+
     # DIRECTIONS - TRANSIT
     elif cmd == 'transit':
         origin, destination = text.split(' ; ')
@@ -279,12 +320,12 @@ def command_handle(chat_id, msg, msg_id, cmd, text=''):
     # CAT
     elif cmd == 'cat':
         bot.sendPhoto(chat_id, cat(), caption=random.choice(captions),
-                      reply_to_message_id=msg_id)
+                      reply_to_message_id=msg_id, disable_notification=True)
 
     # DOG
     elif cmd == 'dog':
         bot.sendPhoto(chat_id, dog(), caption=random.choice(captions),
-                      reply_to_message_id=msg_id)
+                      reply_to_message_id=msg_id, disable_notification=True)
 
 
 def admin_handle(text):
@@ -369,7 +410,7 @@ def handle(msg):
         print()
 
 
-
+'''
 # You can leave this bit out if you're using a paid PythonAnywhere account
 proxy_url = "http://proxy.server:3128"
 telepot.api._pools = {
@@ -377,7 +418,7 @@ telepot.api._pools = {
 }
 telepot.api._onetime_pool_spec = (urllib3.ProxyManager, dict(proxy_url=proxy_url, num_pools=1, maxsize=1, retries=False, timeout=30))
 # end of the stuff that's only needed for free accounts
-
+'''
 
 
 # Main loop runs here
