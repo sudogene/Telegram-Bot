@@ -5,20 +5,10 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 class TebbyBot:
-    '''
-    Tebby is a Telegram bot which uses the telepot wrapper.
-    It is highly functional (as long as there are APIs lol) with features
-    such as weather, news, dictionary, wikipedia, covid updates.
-    There are also light-hearted features ressembling OG chatrooms such as 'slap',
-    and an assortment of memes which can be found in '/media'.
-    
-    This object is not meant to be instantiated more than once at each point in time.
-    Start using the bot with '/help'
-    '''
     def __init__(self, has_started=True):
         self.bot = telepot.Bot(token)
         self.has_started = has_started
-        print("Tebby initialized")
+        print("Tebby initialized!")
 
 
     def run(self):
@@ -82,6 +72,7 @@ class TebbyBot:
             print()
 
 
+    # Admin Handle
     def admin_handle(self, text):
         '''
         Admin commands begin with '!'
@@ -95,6 +86,9 @@ class TebbyBot:
             print("Started: ", has_started)
 
 
+    ##########################
+    #     Command Handle     #
+    ##########################
     def cmd_handle(self, chat_id, msg_id, msg, cmd, text=''):
         '''
         User commands begin with '/'
@@ -177,7 +171,7 @@ class TebbyBot:
             '''
             Rolls a six-sided dice twice.
             '''
-            self.ch_roll(6, 2, chat_id, msg_id)
+            self.ch_roll(chat_id, msg_id, 6, 2)
 
         # 8BALL
         elif cmd == '8ball' and text:
@@ -304,15 +298,18 @@ class TebbyBot:
 
         # CAT
         elif cmd == 'cat':
-            self.bot.sendPhoto(chat_id, cat(), caption=random.choice(captions),
+            self.bot.sendPhoto(chat_id, self._cat_url(), caption=random.choice(captions),
                 reply_to_message_id=msg_id, disable_notification=True)
 
         # DOG
         elif cmd == 'dog':
-            self.bot.sendPhoto(chat_id, dog(), caption=random.choice(captions),
+            self.bot.sendPhoto(chat_id, self._dog_url(), caption=random.choice(captions),
                 reply_to_message_id=msg_id, disable_notification=True)
 
 
+    ##############################
+    #   Command Handle Helpers   #
+    ##############################
     def ch_roll(self, chat_id, msg_id, num_side, num_roll):
         if num_roll > 100:
             self.bot.sendMessage(chat_id, "Oops, too malicious!",
@@ -506,8 +503,6 @@ class TebbyBot:
 
 
     def _ch_oxford_helper(self, query):
-        # using Oxford Dictionaries API
-        # helper function for define and pronounce
         endpoint = "entries"
         language_code = "en-us"
         url = "https://od-api.oxforddictionaries.com/api/v2/" + endpoint + "/" + language_code + "/" + query.lower()
@@ -519,6 +514,10 @@ class TebbyBot:
 
 
     def ch_define(self, chat_id, msg_id, query):
+        '''
+        Uses Oxford Dictionaries API for definitions.
+        In the future, there might be a word pronounciation function.
+        '''
         r = self._ch_oxford_helper(query)
         if r:
             senses = r.json()['results'][0]['lexicalEntries'][0]['entries'][0]['senses']
@@ -539,6 +538,26 @@ class TebbyBot:
                 reply_to_message_id=msg_id, disable_notification=True)
 
 
+    def _cat_url(self):
+        contents = requests.get('https://api.thecatapi.com/v1/images/search').json()
+        return contents[0]['url']
+
+
+    def _dog_helper(self):
+        contents = requests.get('https://random.dog/woof.json').json()
+        url = contents['url']
+        return url
+
+
+    def _dog_url(self):
+        allowed_extension = ['jpg','jpeg','png']
+        file_extension = ''
+        while file_extension not in allowed_extension:
+            url = self._dog_helper()
+            file_extension = re.search("([^.]*)$",url).group(1).lower()
+        return url
+
+
     ''' TODO
     def ch_pronounce(chat_id, msg_id, query):
         r = self_ch_oxford_helper(query)
@@ -551,6 +570,7 @@ class TebbyBot:
             bot.sendMessage(chat_id, "Oop, please try again!",
                             reply_to_message_id=msg_id, disable_notification=True)
     '''
+
 
 if __name__ == '__main__':
     '''
