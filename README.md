@@ -10,10 +10,10 @@ Tebby started out as a light-hearted Telegram bot for sending cats and dogs imag
 With the help of several useful APIs out there, this bot has become relatively useful while
 maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is relatively casual and non-profit, I have no
 plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
-<br>
+
 ### :keyboard: List of User Commands
 Updated as of 13th April 2020.
-<br>
+
 Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). 
 
 Command | Info | API used
@@ -32,4 +32,8 @@ Command | Info | API used
 `/roll` | Rolls an `x` sided dice `y` times, as requested by the user
 `/media` | Returns a menu of commands for triggering amusement, usually in the form of voice or gif.
 
-
+### :microscope: TODO
+- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too... If successful, there may not be a need for `/google` and `/wiki`.
+- Update `/wiki` as it is relatively buggy/ugly.
+- Find ways to make `/google` friendlier than just dumping urls to users.
+- Make `/transit` more flexible and able to provide driving routes too.
