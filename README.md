@@ -4,7 +4,7 @@
 **Main:** ['TebbyBot.py'](TebbyBot.py)
 **Telegram:** @tebby_bot
 
-### :thought_bubble: Background
+### :thought_balloon: Background
 Tebby started out as a light-hearted Telegram bot for sending cats and dogs images to users.
 With the help of several useful APIs out there, this bot has become relatively useful while
 maintaining a good amount of casual fun. Send a `/help` to `@tebby_bot` to get started.
