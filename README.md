@@ -34,6 +34,7 @@ Command | Description | API used
 `/cat` | Returns a random cat image | [TheCatApi](https://docs.thecatapi.com/)
 `/dog` | Returns a random dog image
 
+
 ### :microscope: TODO
 - Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` and `/wiki`.
 - Update `/wiki` as it is relatively buggy/ugly.
