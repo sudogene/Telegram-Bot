@@ -14,7 +14,7 @@ plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get st
 ### :keyboard: List of User Commands
 Updated as of 13th April 2020.
 
-Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). 
+Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). If API and Python libraries are not mentioned in the command description, then it's most likely involves [Requests](https://requests.readthedocs.io/en/master/) and web scraping.
 
 Command | Description | API used
 -------- | -------- | ------
@@ -31,6 +31,8 @@ Command | Description | API used
 `/8ball` | Emulates the [Magic 8-ball](https://en.wikipedia.org/wiki/Magic_8-Ball)
 `/roll` | Rolls an `x` sided dice `y` times, as requested by the user
 `/media` | Returns a menu of commands for triggering amusement,<br>usually in the form of voice or gif
+`/cat` | Returns a random cat image | [TheCatApi](https://docs.thecatapi.com/)
+`/dog` | Returns a random dog image
 
 ### :microscope: TODO
 - Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` and `/wiki`.
