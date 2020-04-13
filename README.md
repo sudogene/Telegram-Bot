@@ -7,7 +7,7 @@
 ### :thought_balloon: Background
 Tebby started out as a light-hearted Telegram bot using [nickoala's](https://github.com/nickoala/telepot) Telepot for sending cats and dogs images to users.
 With the help of several useful APIs out there, this bot has become relatively useful while
-maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is relatively casual and non-profit, I have no
+maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is somewhat casual and non-profit, I have no
 plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
 
 ### :keyboard: List of User Commands
