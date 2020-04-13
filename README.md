@@ -14,7 +14,9 @@ plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get st
 ### :keyboard: List of User Commands
 Updated as of 13th April 2020.
 <br>
-Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow the [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). Command | Info | API used
+Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow the [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). 
+
+Command | Info | API used
 -------- | -------- | ------
 /weather | Gets the weather and temperature of a given country name | [OpenWeatherMap](https://openweathermap.org/api)
 /covid | Gets the updated COVID-19 cases of a given country code | [TrackCorona](https://www.trackcorona.live/api)
