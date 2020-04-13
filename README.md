@@ -11,11 +11,10 @@ With the help of several useful APIs out there, this bot has become relatively u
 maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is relatively casual and non-profit, I have no
 plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
 <br>
-### :keyboard: List of Commands
+### :keyboard: List of User Commands
 Updated as of 13th April 2020.
 <br>
-Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow the [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). 
-User command | Info | API used
+Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow the [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). Command | Info | API used
 -------- | -------- | ------
 /weather | Gets the weather and temperature of a given country name | [OpenWeatherMap](https://openweathermap.org/api)
 /covid | Gets the updated COVID-19 cases of a given country code | [TrackCorona](https://www.trackcorona.live/api)
