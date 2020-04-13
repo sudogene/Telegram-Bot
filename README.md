@@ -33,7 +33,8 @@ Command | Info | API used
 `/media` | Returns a menu of commands for triggering amusement, usually in the form of voice or gif.
 
 ### :microscope: TODO
-- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too... If successful, there may not be a need for `/google` and `/wiki`.
+- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` and `/wiki`.
 - Update `/wiki` as it is relatively buggy/ugly.
 - Find ways to make `/google` friendlier than just dumping urls to users.
+- Add `/forecast` for weather forecast, or add forecast to the current `/weather` command.
 - Make `/transit` more flexible and able to provide driving routes too.
