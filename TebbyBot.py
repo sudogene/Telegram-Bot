@@ -1,4 +1,4 @@
-from Batteries import *
+from Batteries import * # Batteries not included in GitHub due to private API keys
 import telepot, requests, re, random, time, urllib3, wordninja, wikipedia, googlesearch
 from telepot.loop import MessageLoop
 from datetime import datetime
@@ -100,12 +100,18 @@ class TebbyBot:
                 response += c + "\n"
             self.bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
 
-        # HELP-media
-        if cmd == 'media':
+        # HELP MEDIA
+        elif cmd == 'media':
             response = "Tebby has an assortment:\n"
             for c in avail_media:
                 response += c + "\n"
             self.bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
+
+        # SOURCE
+        elif cmd == 'tebby':
+            response = "My source code!\nhttps://github.com/sudogene/Telegram-Bot"
+            self.bot.sendMessage(chat_id, response, reply_to_message_id=msg_id,
+                disable_notification=True)
 
         # MEDIA
         elif cmd in media_get.keys():
@@ -573,8 +579,6 @@ class TebbyBot:
 
 
 if __name__ == '__main__':
-    '''
-    # Currently, this program is being run by PythonAnywhere for free.
     # You can leave this bit out if you're using a paid PythonAnywhere account
     proxy_url = "http://proxy.server:3128"
     telepot.api._pools = {
@@ -582,7 +586,6 @@ if __name__ == '__main__':
     }
     telepot.api._onetime_pool_spec = (urllib3.ProxyManager, dict(proxy_url=proxy_url, num_pools=1, maxsize=1, retries=False, timeout=30))
     # end of the stuff that's only needed for free accounts
-    '''
-    
+
     tebby = TebbyBot()
     tebby.run()
