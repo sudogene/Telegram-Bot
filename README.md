@@ -40,3 +40,5 @@ Command | Description | API used
 - Find ways to make `/google` friendlier than just dumping urls to users.
 - Add `/forecast` for weather forecast, or add forecast to the current `/weather` command.
 - Make `/transit` more flexible and able to provide driving routes too.
+- Random generators; such as numbers, emojis, colours.
+- Improve chat features of Tebby (machine learning chatbot? might be overkill)
