@@ -1,14 +1,17 @@
-from Batteries import * # Batteries not included in GitHub due to private API keys
+from Batteries import *
+from Logger import Logger
 import telepot, requests, re, random, time, urllib3, wordninja, wikipedia, googlesearch
 from telepot.loop import MessageLoop
-from datetime import datetime
+import datetime as dt
 from bs4 import BeautifulSoup
 
 class TebbyBot:
     def __init__(self, has_started=True):
         self.bot = telepot.Bot(token)
         self.has_started = has_started
-        print("Tebby initialized!")
+        self.logger = Logger('log.txt')
+
+        print(f"Tebby initialized! {emoji['tebby']}{emoji['robot']}")
 
 
     def run(self):
@@ -35,12 +38,22 @@ class TebbyBot:
         '''
         content_type, chat_type, chat_id = telepot.glance(msg)
         msg_id = telepot.message_identifier(msg)[1]
-        print(datetime.now().strftime("%H:%M:%S"), content_type, chat_type, chat_id, end=' ')
+        log = f'{str(dt.date.today())} {dt.datetime.now().strftime("%H:%M:%S")} {content_type} {chat_type} {chat_id}'
+        if content_type == 'text':
+            log += f' {self.get_user(msg["from"]["id"])}: {msg["text"]}'
+
+        msg_timestamp = dt.datetime.fromtimestamp(int(msg['date']))
+        time_now = dt.datetime.now()
+        if ((time_now - msg_timestamp).seconds / 60) > 5:
+            log = '[NOT PROCESSED] ' + log
+            self.logger.log(log)
+            return
+
+        self.logger.log(log)
 
         if content_type == 'text':
             text = msg['text']
             uid = msg['from']['id']
-            print(self.get_user(uid))
 
             # ADMIN COMMANDS
             if text.startswith('!'):
@@ -68,8 +81,6 @@ class TebbyBot:
             # GREETINGS
             elif 'teb' in text.lower().split() or 'tebby' in text.lower().split():
                 self.bot.sendMessage(chat_id, random.choice(intro))
-        else:
-            print()
 
 
     # Admin Handle
@@ -95,21 +106,21 @@ class TebbyBot:
         Calls command_handler helper functions (ch)'
         '''
         if cmd == 'help':
-            response = "Tebby lives to serve:\n"
+            response = "Tebby lives to serve\n"
             for c in avail_cmd:
                 response += c + "\n"
             self.bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
 
         # HELP MEDIA
         elif cmd == 'media':
-            response = "Tebby has an assortment:\n"
+            response = "Tebby recommends \U0001F4FD\U0001F3B6\n"
             for c in avail_media:
                 response += c + "\n"
             self.bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
 
         # SOURCE
         elif cmd == 'tebby':
-            response = "My source code!\nhttps://github.com/sudogene/Telegram-Bot"
+            response = "Tebby's source code!\nhttps://github.com/sudogene/Telegram-Bot"
             self.bot.sendMessage(chat_id, response, reply_to_message_id=msg_id,
                 disable_notification=True)
 
@@ -117,13 +128,13 @@ class TebbyBot:
         elif cmd in media_get.keys():
             # For single files
             media_file = media_get[cmd]
-            if media_file[-1] == '4':
-                # mp4 file, most probably gif
-                self.bot.sendDocument(chat_id, open(media_file, 'rb'),
-                    disable_notification=True)
-            else:
+            if media_file[-1] == '3':
                 # mp3 file
                 self.bot.sendVoice(chat_id, open(media_file, 'rb'),
+                    disable_notification=True)
+            else:
+                # mp4 file, most probably gif
+                self.bot.sendDocument(chat_id, open(media_file, 'rb'),
                     disable_notification=True)
 
         # MEDIA COMBOS
@@ -185,7 +196,7 @@ class TebbyBot:
             Random response from 8-ball.
             Don't use this to make life decisions.
             '''
-            self.bot.sendMessage(chat_id, random.choice(ball_response),
+            self.bot.sendMessage(chat_id, f"{emoji['8ball']} {random.choice(ball_response)}",
                 reply_to_message_id=msg_id)
 
         # SLAP
@@ -238,7 +249,15 @@ class TebbyBot:
             Query with country name, defaults to Singapore.
             '''
             if text:
-                self.ch_weather(chat_id, msg_id, text)
+                if len(text) == 2:
+                    try:
+                        text = code_to_name[text]
+                        self.ch_weather(chat_id, msg_id, text)
+                    except:
+                        self.bot.sendMessage(chat_id, "Oops, please try again!",
+                            reply_to_message_id=msg_id, disable_notification=True)
+                else:
+                    self.ch_weather(chat_id, msg_id, text)
             else:
                 self.ch_weather(chat_id, msg_id)
 
@@ -248,12 +267,16 @@ class TebbyBot:
             Uses News API. Returns top 5 news headlines.
             Query with country code, defaults to sg.
             '''
-            if text and text in news_valid_country:
-                self.ch_news(chat_id, msg_id, text)
-            elif text:
-                self.bot.sendMessage(chat_id,
-                    "Oops, please try again using country codes!",
-                    reply_to_message_id=msg_id, disable_notification=True)
+            if text:
+                if len(text) > 2:
+                    try:
+                        text = name_to_code[text]
+                        self.ch_news(chat_id, msg_id, text)
+                    except:
+                        self.bot.sendMessage(chat_id, "Oops. please try again!",
+                            reply_to_message_id=msg_id, disable_notification=True)
+                else:
+                    self.ch_news(chat_id, msg_id, text)
             else:
                 self.ch_news(chat_id, msg_id)
 
@@ -263,11 +286,11 @@ class TebbyBot:
             Uses Google Maps services, currently only supports public transportation.
             Requires current and destination to be separated by ' ; ' string.
             '''
-            if not text or ' ; ' not in text:
+            if not text or ' to ' not in text:
                 self.bot.sendMessage(chat_id, help_usage['transit'],
                     reply_to_message_id=msg_id, disable_notification=True)
                 return
-            origin, destination = text.split(' ; ')
+            origin, destination = text.split(' to ')
             self.ch_transit(chat_id, msg_id, origin, destination)
 
         # GOOGLE SEARCH
@@ -279,17 +302,25 @@ class TebbyBot:
             if text:
                 self.ch_gglsearch(chat_id, msg_id, text)
             else:
-                self.bot.sendMessage(chat_id, "Please give me something to search!",
+                self.bot.sendMessage(chat_id, "Give Tebby something to search!",
                     reply_to_message_id=msg_id, disable_notification=True)
 
         # COVID19 CASES
         elif cmd == 'covid':
             '''
-            Grabs cases from trackcorona.live
+            Grabs cases from trackcorona.live using country codes
             Stay safe everyone.
             '''
             if text:
-                self.ch_covid(chat_id, msg_id, text)
+                if len(text) > 2:
+                    try:
+                        text = name_to_code[text]
+                        self.ch_covid(chat_id, msg_id, text)
+                    except:
+                        self.bot.sendMessage(chat_id, "Oops. please try again!",
+                            reply_to_message_id=msg_id, disable_notification=True)
+                else:
+                    self.ch_covid(chat_id, msg_id, text)
             else:
                 self.ch_covid(chat_id, msg_id)
 
@@ -312,13 +343,54 @@ class TebbyBot:
             self.bot.sendPhoto(chat_id, self._dog_url(), caption=random.choice(captions),
                 reply_to_message_id=msg_id, disable_notification=True)
 
+        # BTC
+        elif cmd == 'btc':
+            #https://pro.coinmarketcap.com/account
+            url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest'
+            parameters = {
+              'start':'1',
+              'limit':'1',
+              'convert':'SGD'
+            }
+            headers = {
+              'Accepts': 'application/json',
+              'X-CMC_PRO_API_KEY': coin_key,
+            }
+            s = requests.Session()
+            s.headers.update(headers)
+            r = s.get(url, params=parameters)
+            try:
+                data = r.json()['data'][0]
+                name = f"{data['name']} Rates"
+                sgd = round(data['quote']['SGD']['price'], 2)
+                percent_1h = round(data['quote']['SGD']['percent_change_1h'], 2)
+                percent_24h = round(data['quote']['SGD']['percent_change_24h'], 2)
+                percent_7d = round(data['quote']['SGD']['percent_change_7d'], 2)
+
+
+                res = f"\n1 BTC = {sgd} SGD\n\nPercent changes in\n1 hr: {percent_1h}%\n24 hr: {percent_24h}%\n7 d: {percent_7d}%"
+                res = name + res
+
+                self.bot.sendMessage(chat_id, res, disable_notification=True, reply_to_message_id=msg_id,
+                    parse_mode='Markdown',)
+
+            except:
+                self.bot.sendMessage(chat_id, "??", disable_notification=True, reply_to_message_id=msg_id)
+
 
     ##############################
     #   Command Handle Helpers   #
     ##############################
     def ch_roll(self, chat_id, msg_id, num_side, num_roll):
+        '''
+        # special Telegram dice roll animation
+        if num_side == 6 and num_roll == 1:
+            self.bot.sendMessage(chat_id, "\U0001F3B2")
+            return
+        '''
+
         if num_roll > 100:
-            self.bot.sendMessage(chat_id, "Oops, too malicious!",
+            self.bot.sendMessage(chat_id, f"Don't be malicious! {emoji['sad']}",
                             reply_to_message_id=msg_id, disable_notification=True)
             return
         res = []
@@ -329,20 +401,20 @@ class TebbyBot:
             self.bot.sendMessage(chat_id, ch_response,
                             reply_to_message_id=msg_id, disable_notification=True)
         except:
-            self.bot.sendMessage(chat_id, "Oops, too malicious!",
+            self.bot.sendMessage(chat_id, "Don't be malicious! {emoji['sad']}",
                             reply_to_message_id=msg_id, disable_notification=True)
 
 
     def ch_wiki(self, chat_id, msg_id, query, long=False):
         try:
             if long:
-                self.bot.sendMessage(chat_id, wikipedia.summary(query, sentences=8),
+                self.bot.sendMessage(chat_id, wikipedia.summary(query, sentences=5),
                                 reply_to_message_id=msg_id, disable_notification=True)
             else:
                 self.bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2),
                                 reply_to_message_id=msg_id, disable_notification=True)
         except Exception:
-            self.bot.sendMessage(chat_id, "Oops, please try again!",
+            self.bot.sendMessage(chat_id, "Oops, that's a strange query!",
                             reply_to_message_id=msg_id, disable_notification=True)
 
 
@@ -375,11 +447,12 @@ class TebbyBot:
             curr_hum = data['humidity']
             desc = r['weather'][0]['description'].capitalize()
             weather_id = r['weather'][0]['id']
-            try:
-                icon = ow_emoji[str(weather_id)[0]]
-            except:
-                print("No icon for weather id:", weather_id)
-                icon = ''
+            if weather_id != '800':
+                try:
+                    icon = ow_emoji[str(weather_id)[0]]
+                except:
+                    print("No icon for weather id:", weather_id)
+                    icon = ''
 
             ch_response = f"*{city.capitalize()}* {icon}\n\n" + \
                           f"{desc}\n" + \
@@ -391,18 +464,18 @@ class TebbyBot:
             self.bot.sendMessage(chat_id, ch_response, parse_mode='Markdown',
                 reply_to_message_id=msg_id)
         else:
-            self.bot.sendMessage(chat_id, "Oops, please try again!",
+            self.bot.sendMessage(chat_id, f"The site is feeling under the weather {emoji['sadcry']}",
                 reply_to_message_id=msg_id, disable_notification=True)
 
 
     def ch_news(self, chat_id, msg_id, country="sg"):
         api_key = news_key
-        url = f"http://newsapi.org/v2/top-headlines?country={country}&apiKey={api_key}&pageSize=5"
+        url = f"http://newsapi.org/v2/top-headlines?country={country}&apiKey={api_key}&pageSize=4"
         r = requests.get(url).json()
 
         status = r['status']
         if status != 'ok':
-            self.bot.sendMessage(chat_id, "Whoops, try again later!")
+            self.bot.sendMessage(chat_id, f"Sorry Tebby can't reach the site... {emoji['sad']}")
             return
 
         ch_response = ""
@@ -472,8 +545,8 @@ class TebbyBot:
 
 
     def ch_gglsearch(self, chat_id, msg_id, query):
-        urls = [url for url in googlesearch.search(query, stop=5)]
-        ch_response = "Here are the top 5 results!\n\n"
+        urls = [url for url in googlesearch.search(query, stop=4)]
+        ch_response = "Here are the top 4 results!\n\n"
         '''
         for url in urls:
             r = requests.get(url)
@@ -490,9 +563,15 @@ class TebbyBot:
 
 
     def ch_covid(self, chat_id, msg_id, query='sg'):
-        url = 'https://www.trackcorona.live/api/countries/'
+        url1 = 'https://www.trackcorona.live/api/countries'
+
+        r= requests.get(url1)
+        if not r:
+            self.bot.sendMessage(chat_id, f"Sorry Tebby can't reach the site... {emoji['sad']}",
+                reply_to_message_id=msg_id, disable_notification=True)
+            return
         try:
-            r = requests.get(url).json()['data']
+            r = r.json()['data']
             i = 0
             while (True):
                 if r[i]['country_code'] == query:
@@ -504,8 +583,8 @@ class TebbyBot:
             self.bot.sendMessage(chat_id, ch_response, parse_mode='Markdown', reply_to_message_id=msg_id)
 
         except:
-            self.bot.sendMessage(chat_id, "Oops, please try again using country codes!",
-                reply_to_message_id=msg_id)
+            self.bot.sendMessage(chat_id, "Oops, something went wrong!",
+                reply_to_message_id=msg_id, disable_notification=True)
 
 
     def _ch_oxford_helper(self, query):
@@ -563,6 +642,17 @@ class TebbyBot:
             file_extension = re.search("([^.]*)$",url).group(1).lower()
         return url
 
+    def ch_meme(self, chat_id, msg_id):
+        random_url = random.choice(meme_urls)
+        try:
+            start = datetime.now()
+            self.bot.sendPhoto(chat_id, random_url, reply_to_message_id=msg_id, disable_notification=True)
+            end = datetime.now()
+            if (end - start).seconds > 5:
+                print("Time exceeded:", random_url)
+        except:
+            print("Failed:", random_url)
+
 
     ''' TODO
     def ch_pronounce(chat_id, msg_id, query):
@@ -589,3 +679,4 @@ if __name__ == '__main__':
 
     tebby = TebbyBot()
     tebby.run()
+
