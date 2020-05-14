@@ -32,6 +32,8 @@ Command | Description | API used
 `/media` | Returns a menu of commands for triggering amusement,<br>usually in the form of voice or gif
 `/cat` | Returns a random cat image | [TheCatApi](https://docs.thecatapi.com/)
 `/dog` | Returns a random dog image
+`/calc` | Calculates, find solutions, and evaluates query in text form | [WolframAlpha](https://products.wolframalpha.com/api/)
+`/plot` | Plots graph from given query in text form| [WolframAlpha](https://products.wolframalpha.com/api/)
 
 
 ### :microscope: TODO
@@ -41,4 +43,3 @@ Command | Description | API used
 - Add `/forecast` for weather forecast, or add forecast to the current `/weather` command.
 - Make `/transit` more flexible and able to provide driving routes too.
 - Random generators; such as numbers, emojis, colours.
-- Improve chat features of Tebby (machine learning chatbot? might be overkill)
