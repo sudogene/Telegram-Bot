@@ -377,6 +377,13 @@ class TebbyBot:
             except:
                 self.bot.sendMessage(chat_id, "??", disable_notification=True, reply_to_message_id=msg_id)
 
+        # WOLFRAM ALPHA
+        elif cmd == 'calc' or cmd == 'calculate':
+            self.ch_wfa_calc(chat_id, msg_id, ''.join(text))
+        elif cmd == 'plot':
+            self.ch_wfa_plot(chat_id, msg_id, ''.join(text))
+
+
 
     ##############################
     #   Command Handle Helpers   #
@@ -642,16 +649,54 @@ class TebbyBot:
             file_extension = re.search("([^.]*)$",url).group(1).lower()
         return url
 
-    def ch_meme(self, chat_id, msg_id):
-        random_url = random.choice(meme_urls)
-        try:
-            start = datetime.now()
-            self.bot.sendPhoto(chat_id, random_url, reply_to_message_id=msg_id, disable_notification=True)
-            end = datetime.now()
-            if (end - start).seconds > 5:
-                print("Time exceeded:", random_url)
-        except:
-            print("Failed:", random_url)
+    
+    def _query_format(self, query):
+        for r in (('%', '%25'), ('+', '%2B'), (' ', '+'), ('=', '%3D'), ('^', '%5E'), ('(', '%28'), (')', '%29')):
+            query = query.replace(*r)
+        return query
+
+    
+    def ch_wfa_pods(self, query):
+        # https://developer.wolframalpha.com/portal/myapps/
+	    fquery = self._query_format(query)
+	    url = f'http://api.wolframalpha.com/v2/query?input={fquery}&appid={wfa_key}&output=json'
+	    r = requests.get(url).json()
+	    pods = r['queryresult']['pods']
+	    return pods
+
+    
+    def ch_wfa_botsend(self, chat_id, msg_id, pod, img=False):
+	    if img:
+	        self.bot.sendPhoto(chat_id, pod['subpods'][0]['img']['src'], reply_to_message_id=msg_id, disable_notification=True)
+	    else:
+	        ch_response = 'Result:\n'
+	        for subpod in pod['subpods']:
+	            ch_response += subpod['plaintext'] + '\n'
+	        ch_response = ch_response.strip()
+	        self.bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id, disable_notification=True)
+	    return
+
+    
+    def ch_wfa_calc(self, chat_id, msg_id, query):
+        pods = self.ch_wfa_pods(query)
+        for pod in pods:
+            title = pod['title']
+            if title in ('Sum', 'Product'):
+                self.ch_wfa_botsend(chat_id, msg_id, pod, img=True)
+                return
+            elif title in ('Roots', 'Root', 'Results', 'Solution', 'Solutions', 'Complex solutions', 'Result', 'Real root', 'Real roots', 'Complex root', 'Complex roots'):
+                self.ch_wfa_botsend(chat_id, msg_id, pod)
+                return
+        print("NO SOLUTION FOUND")
+
+        
+    def ch_wfa_plot(self, chat_id, msg_id, query):
+        pods = self.ch_wfa_pods(query)
+        for pod in pods:
+            title = pod['title']
+            if title == 'Plot':
+                self.ch_wfa_botsend(chat_id, msg_id, pod, img=True)
+                return
 
 
     ''' TODO
@@ -679,4 +724,3 @@ if __name__ == '__main__':
 
     tebby = TebbyBot()
     tebby.run()
-
