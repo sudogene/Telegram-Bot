@@ -1,6 +1,9 @@
 from collections import deque
 
 class Logger:
+    '''
+    The logger logs...
+    '''
     def __init__(self, filename):
         self.filename = filename
 
@@ -9,6 +12,9 @@ class Logger:
             file.write(text + '\n')
 
     def print_info(self, n_last_lines=5):
+        '''
+        Runs for debugging.
+        '''
         print('========= Debug log =========')
         print(f'File name: {self.filename}')
         print(f'Total lines: {sum(1 for line in open(self.filename))}')
@@ -18,5 +24,6 @@ class Logger:
         print(''.join(lines).strip())
         print('========= End of log =========')
 
+        
 if __name__ == '__main__':
     Logger('log.txt').print_info()
