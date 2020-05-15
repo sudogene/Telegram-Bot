@@ -5,6 +5,7 @@ from telepot.loop import MessageLoop
 import datetime as dt
 from bs4 import BeautifulSoup
 
+
 class TebbyBot:
     def __init__(self, has_started=True):
         self.bot = telepot.Bot(token)
@@ -113,7 +114,7 @@ class TebbyBot:
 
         # HELP MEDIA
         elif cmd == 'media':
-            response = "Tebby recommends \U0001F4FD\U0001F3B6\n"
+            response = ""
             for c in avail_media:
                 response += c + "\n"
             self.bot.sendMessage(chat_id, response.rstrip(), disable_notification=True)
@@ -224,11 +225,13 @@ class TebbyBot:
         # WIKI
         elif cmd == 'wiki' and text:
             '''
-            Wikipedia. Kinda sucky currently, the formatting is weird.
+            Wikipedia. Produces link or summary.
             '''
             self.ch_wiki(chat_id, msg_id, text)
         elif cmd == 'wikilong' and text:
             self.ch_wiki(chat_id, msg_id, text, long=True)
+        elif (cmd == 'wikilink' or cmd == 'wlink') and text:
+            self.ch_wiki(chat_id, msg_id, text, link=True)
 
         # CAP CALCULATOR
         elif cmd == 'cap':
@@ -379,10 +382,17 @@ class TebbyBot:
 
         # WOLFRAM ALPHA
         elif cmd == 'calc' or cmd == 'calculate':
-            self.ch_wfa_calc(chat_id, msg_id, ''.join(text))
+            try:
+                self.ch_wfa_calc(chat_id, msg_id, ''.join(text))
+            except:
+                self.bot.sendMessage(chat_id, "Whoops, try using it like Wolfram Alpha!",
+                    disable_notification=True, reply_to_message_id=msg_id)
         elif cmd == 'plot':
-            self.ch_wfa_plot(chat_id, msg_id, ''.join(text))
-
+            try:
+                self.ch_wfa_plot(chat_id, msg_id, ''.join(text))
+            except:
+                self.bot.sendMessage(chat_id, "Whoops, try using it like Wolfram Alpha!",
+                    disable_notification=True, reply_to_message_id=msg_id)
 
 
     ##############################
@@ -412,16 +422,18 @@ class TebbyBot:
                             reply_to_message_id=msg_id, disable_notification=True)
 
 
-    def ch_wiki(self, chat_id, msg_id, query, long=False):
+    def ch_wiki(self, chat_id, msg_id, query, long=False, link=False):
         try:
-            if long:
-                self.bot.sendMessage(chat_id, wikipedia.summary(query, sentences=5),
-                                reply_to_message_id=msg_id, disable_notification=True)
+            if link:
+                res = wikipedia.page(query).url
             else:
-                self.bot.sendMessage(chat_id, wikipedia.summary(query, sentences=2),
+                num = 5 if long else 3
+                res = wikipedia.summary(query, sentences=num)
+                res = res.split('\n\n\n')[0]
+            self.bot.sendMessage(chat_id, res,
                                 reply_to_message_id=msg_id, disable_notification=True)
-        except Exception:
-            self.bot.sendMessage(chat_id, "Oops, that's a strange query!",
+        except:
+            self.bot.sendMessage(chat_id, "Oops, something's wrong!",
                             reply_to_message_id=msg_id, disable_notification=True)
 
 
@@ -649,13 +661,11 @@ class TebbyBot:
             file_extension = re.search("([^.]*)$",url).group(1).lower()
         return url
 
-    
     def _query_format(self, query):
         for r in (('%', '%25'), ('+', '%2B'), (' ', '+'), ('=', '%3D'), ('^', '%5E'), ('(', '%28'), (')', '%29')):
             query = query.replace(*r)
         return query
 
-    
     def ch_wfa_pods(self, query):
         # https://developer.wolframalpha.com/portal/myapps/
 	    fquery = self._query_format(query)
@@ -664,7 +674,6 @@ class TebbyBot:
 	    pods = r['queryresult']['pods']
 	    return pods
 
-    
     def ch_wfa_botsend(self, chat_id, msg_id, pod, img=False):
 	    if img:
 	        self.bot.sendPhoto(chat_id, pod['subpods'][0]['img']['src'], reply_to_message_id=msg_id, disable_notification=True)
@@ -676,7 +685,6 @@ class TebbyBot:
 	        self.bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id, disable_notification=True)
 	    return
 
-    
     def ch_wfa_calc(self, chat_id, msg_id, query):
         pods = self.ch_wfa_pods(query)
         for pod in pods:
@@ -689,7 +697,6 @@ class TebbyBot:
                 return
         print("NO SOLUTION FOUND")
 
-        
     def ch_wfa_plot(self, chat_id, msg_id, query):
         pods = self.ch_wfa_pods(query)
         for pod in pods:
