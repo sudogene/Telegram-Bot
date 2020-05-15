@@ -11,7 +11,7 @@ maintaining a good amount of casual fun. Currently, this bot's codes are being h
 plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
 
 ### :keyboard: List of User Commands
-Updated as of 14th May 2020.
+Updated as of 15th May 2020.
 
 Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). If API and Python libraries are not mentioned in the command description, then it most likely involves [Requests](https://requests.readthedocs.io/en/master/) and web scraping.
 
@@ -35,10 +35,13 @@ Command | Description | API used
 `/calc` | Calculates, find solutions, and evaluates query in text form | [WolframAlpha](https://products.wolframalpha.com/api/)
 `/plot` | Plots graph from given query in text form| [WolframAlpha](https://products.wolframalpha.com/api/)
 
+### :octocat: Recent Updates
+- Added Wolfram Alpha features using its API, can solve and evaluate (`/calc`) or plot graphs (`/plot`).
+- Improved wikipedia commands, contains `/wiki` and `/wikilink` (or `/wlink`) with better formatting.
+- Added debug logger since the usage is getting bigger.
 
 ### :microscope: TODO
-- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` and `/wiki`.
-- Update `/wiki` as it is relatively buggy/ugly.
+- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` or `/wiki`.
 - Find ways to make `/google` friendlier than just dumping urls to users.
 - Add `/forecast` for weather forecast, or add forecast to the current `/weather` command.
 - Make `/transit` more flexible and able to provide driving routes too.
