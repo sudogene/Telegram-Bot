@@ -1,8 +1,16 @@
 from Batteries import *
 from Logger import Logger
-import telepot, requests, re, random, time, urllib3, wordninja, wikipedia, googlesearch
+import telepot
 from telepot.loop import MessageLoop
 import datetime as dt
+import requests
+import re
+import random
+import time
+import urllib3
+import wordninja
+import wikipedia
+import googlesearch
 from bs4 import BeautifulSoup
 
 
@@ -106,7 +114,7 @@ class TebbyBot:
         User commands begin with '/'
         Calls command_handler helper functions (ch)'
         '''
-        if cmd == 'help':
+        if cmd == 'help' or cmd == 'start':
             response = "Tebby lives to serve\n"
             for c in avail_cmd:
                 response += c + "\n"
@@ -661,10 +669,12 @@ class TebbyBot:
             file_extension = re.search("([^.]*)$",url).group(1).lower()
         return url
 
+
     def _query_format(self, query):
         for r in (('%', '%25'), ('+', '%2B'), (' ', '+'), ('=', '%3D'), ('^', '%5E'), ('(', '%28'), (')', '%29')):
             query = query.replace(*r)
         return query
+
 
     def ch_wfa_pods(self, query):
         # https://developer.wolframalpha.com/portal/myapps/
@@ -674,6 +684,7 @@ class TebbyBot:
 	    pods = r['queryresult']['pods']
 	    return pods
 
+	
     def ch_wfa_botsend(self, chat_id, msg_id, pod, img=False):
 	    if img:
 	        self.bot.sendPhoto(chat_id, pod['subpods'][0]['img']['src'], reply_to_message_id=msg_id, disable_notification=True)
@@ -684,6 +695,7 @@ class TebbyBot:
 	        ch_response = ch_response.strip()
 	        self.bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id, disable_notification=True)
 	    return
+
 
     def ch_wfa_calc(self, chat_id, msg_id, query):
         pods = self.ch_wfa_pods(query)
@@ -697,6 +709,7 @@ class TebbyBot:
                 return
         print("NO SOLUTION FOUND")
 
+	
     def ch_wfa_plot(self, chat_id, msg_id, query):
         pods = self.ch_wfa_pods(query)
         for pod in pods:
@@ -704,20 +717,6 @@ class TebbyBot:
             if title == 'Plot':
                 self.ch_wfa_botsend(chat_id, msg_id, pod, img=True)
                 return
-
-
-    ''' TODO
-    def ch_pronounce(chat_id, msg_id, query):
-        r = self_ch_oxford_helper(query)
-        if r:
-            audio = r.json()['results'][0]['lexicalEntries'][0]['pronunciations'][1]
-            audio_url = audio['audioFile']
-            r = requests.get(audio_url)
-            bot.sendVoice(chat_id, ('temp.mp3', r.content), reply_to_message_id=msg_id, disable_notification=True)
-        else:
-            bot.sendMessage(chat_id, "Oop, please try again!",
-                            reply_to_message_id=msg_id, disable_notification=True)
-    '''
 
 
 if __name__ == '__main__':
