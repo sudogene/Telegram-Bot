@@ -1,16 +1,8 @@
 from Batteries import *
 from Logger import Logger
-import telepot
+import telepot, requests, re, random, time, urllib3, wordninja, wikipedia, googlesearch
 from telepot.loop import MessageLoop
 import datetime as dt
-import requests
-import re
-import random
-import time
-import urllib3
-import wordninja
-import wikipedia
-import googlesearch
 from bs4 import BeautifulSoup
 
 
@@ -262,7 +254,7 @@ class TebbyBot:
             if text:
                 if len(text) == 2:
                     try:
-                        text = code_to_name[text]
+                        text = code_to_name[text.lower()]
                         self.ch_weather(chat_id, msg_id, text)
                     except:
                         self.bot.sendMessage(chat_id, "Oops, please try again!",
@@ -279,17 +271,29 @@ class TebbyBot:
             Query with country code, defaults to sg.
             '''
             if text:
+                text = text.lower()
                 if len(text) > 2:
                     try:
                         text = name_to_code[text]
-                        self.ch_news(chat_id, msg_id, text)
+                        print(text)
+                        if text in news_valid_country:
+                            self.ch_news(chat_id, msg_id, text)
+                        else:
+                            self.bot.sendMessage(chat_id, "Hi Rachel, country not supported :)",
+                                reply_to_message_id=msg_id, disable_notification=True)
                     except:
                         self.bot.sendMessage(chat_id, "Oops. please try again!",
                             reply_to_message_id=msg_id, disable_notification=True)
                 else:
-                    self.ch_news(chat_id, msg_id, text)
+                    if text in news_valid_country:
+                        self.ch_news(chat_id, msg_id, text)
+                    else:
+                        self.bot.sendMessage(chat_id, "Hi Rachel, country not supported :)",
+                            reply_to_message_id=msg_id, disable_notification=True)
             else:
-                self.ch_news(chat_id, msg_id)
+                self.bot.sendMessage(chat_id, "Please input a country!",
+                            reply_to_message_id=msg_id, disable_notification=True)
+
 
         # DIRECTIONS - TRANSIT
         elif cmd == 'transit':
@@ -320,12 +324,11 @@ class TebbyBot:
         elif cmd == 'covid':
             '''
             Grabs cases from trackcorona.live using country codes
-            Stay safe everyone.
             '''
             if text:
                 if len(text) > 2:
                     try:
-                        text = name_to_code[text]
+                        text = name_to_code[text.lower()]
                         self.ch_covid(chat_id, msg_id, text)
                     except:
                         self.bot.sendMessage(chat_id, "Oops. please try again!",
@@ -669,12 +672,10 @@ class TebbyBot:
             file_extension = re.search("([^.]*)$",url).group(1).lower()
         return url
 
-
     def _query_format(self, query):
         for r in (('%', '%25'), ('+', '%2B'), (' ', '+'), ('=', '%3D'), ('^', '%5E'), ('(', '%28'), (')', '%29')):
             query = query.replace(*r)
         return query
-
 
     def ch_wfa_pods(self, query):
         # https://developer.wolframalpha.com/portal/myapps/
@@ -684,7 +685,6 @@ class TebbyBot:
 	    pods = r['queryresult']['pods']
 	    return pods
 
-	
     def ch_wfa_botsend(self, chat_id, msg_id, pod, img=False):
 	    if img:
 	        self.bot.sendPhoto(chat_id, pod['subpods'][0]['img']['src'], reply_to_message_id=msg_id, disable_notification=True)
@@ -695,7 +695,6 @@ class TebbyBot:
 	        ch_response = ch_response.strip()
 	        self.bot.sendMessage(chat_id, ch_response, reply_to_message_id=msg_id, disable_notification=True)
 	    return
-
 
     def ch_wfa_calc(self, chat_id, msg_id, query):
         pods = self.ch_wfa_pods(query)
@@ -709,7 +708,6 @@ class TebbyBot:
                 return
         print("NO SOLUTION FOUND")
 
-	
     def ch_wfa_plot(self, chat_id, msg_id, query):
         pods = self.ch_wfa_pods(query)
         for pod in pods:
@@ -717,6 +715,20 @@ class TebbyBot:
             if title == 'Plot':
                 self.ch_wfa_botsend(chat_id, msg_id, pod, img=True)
                 return
+
+
+    ''' TODO
+    def ch_pronounce(chat_id, msg_id, query):
+        r = self_ch_oxford_helper(query)
+        if r:
+            audio = r.json()['results'][0]['lexicalEntries'][0]['pronunciations'][1]
+            audio_url = audio['audioFile']
+            r = requests.get(audio_url)
+            bot.sendVoice(chat_id, ('temp.mp3', r.content), reply_to_message_id=msg_id, disable_notification=True)
+        else:
+            bot.sendMessage(chat_id, "Oop, please try again!",
+                            reply_to_message_id=msg_id, disable_notification=True)
+    '''
 
 
 if __name__ == '__main__':
@@ -730,3 +742,4 @@ if __name__ == '__main__':
 
     tebby = TebbyBot()
     tebby.run()
+
