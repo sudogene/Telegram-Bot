@@ -1,37 +1,48 @@
-## Welcome to GitHub Pages
+# Tebby :teddy_bear::robot:
+## The API-wielding Telegram Bot
 
-You can use the [editor on GitHub](https://github.com/sudogene/Telegram-Bot/edit/master/docs/index.md) to maintain and preview the content for your website in Markdown files.
+**Main code:** [TebbyBot.py](TebbyBot.py)
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+**Telegram:** `@tebby_bot`
+### :thought_balloon: Background
+Tebby started out as a light-hearted Telegram bot using [nickoala's](https://github.com/nickoala/telepot) Telepot for sending cats and dogs images to users.
+With the help of several useful APIs out there, this bot has become relatively useful while
+maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is casual and non-profit, I have no
+plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
 
-### Markdown
+### :keyboard: List of User Commands
+Updated as of 15th May 2020.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). If API and Python libraries are not mentioned in the command description, then it most likely involves [Requests](https://requests.readthedocs.io/en/master/) and web scraping.
 
-```markdown
-Syntax highlighted code block
+Command | Description | API used
+-------- | -------- | ------
+`/weather` | Gets the weather and temperature of a given `country name` | [OpenWeatherMap](https://openweathermap.org/api)
+`/covid` | Gets the updated COVID-19 cases of a given `country code` | [TrackCorona](https://www.trackcorona.live/api)
+`/news` | Gets the top headlines of a given `country code` | [News API](https://newsapi.org/)
+`/transit` | Returns step-by-step instructions for transit from `x` to `y`, as requested by user | [Google Maps Platform](https://developers.google.com/maps/documentation)
+`/wiki` | Provides Wikipedia summary of a `query`<br>Uses [goldsmith's](https://github.com/goldsmith/Wikipedia) wikipedia library
+`/define` | Gets definition of a `word` | [Oxford Dictionaries](https://developer.oxforddictionaries.com/)
+`/google` | Returns top urls of a google search `query`<br>Uses [MarioVilas'](https://github.com/MarioVilas/googlesearch) google search library
+`/choose` | Randomly chooses between `choices` given by indecisive users
+`/slap` | Inspired from and tribute to [IRC](https://en.wikipedia.org/wiki/Wikipedia:Whacking_with_a_wet_trout) wet trout feature
+`/award` | Similar to the slap feature except it's good
+`/8ball` | Emulates the [Magic 8-ball](https://en.wikipedia.org/wiki/Magic_8-Ball)
+`/roll` | Rolls an `x` sided dice `y` times, as requested by the user
+`/media` | Returns a menu of commands for triggering amusement,<br>usually in the form of voice or gif
+`/cat` | Returns a random cat image | [TheCatApi](https://docs.thecatapi.com/)
+`/dog` | Returns a random dog image
+`/calc` | Calculates, find solutions, and evaluates query in text form | [WolframAlpha](https://products.wolframalpha.com/api/)
+`/plot` | Plots graph from given query in text form| [WolframAlpha](https://products.wolframalpha.com/api/)
 
-# Header 1
-## Header 2
-### Header 3
+### :octocat: Recent Updates
+- Added Wolfram Alpha features using its API, can solve and evaluate (`/calc`) or plot graphs (`/plot`).
+- Improved wikipedia commands, contains `/wiki` and `/wikilink` (or `/wlink`) with better formatting.
+- Added debug logger since the usage is getting bigger.
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/sudogene/Telegram-Bot/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+### :microscope: TODO
+- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` or `/wiki`.
+- Find ways to make `/google` friendlier than just dumping urls to users.
+- Add `/forecast` for weather forecast, or add forecast to the current `/weather` command.
+- Make `/transit` more flexible and able to provide driving routes too.
+- Random generators; such as numbers, emojis, colours.
