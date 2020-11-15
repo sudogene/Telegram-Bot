@@ -1,16 +1,14 @@
-# Tebby :teddy_bear::robot:
+# Tebby
 ## The API-wielding Telegram Bot
 
-**Main code:** [TebbyBot.py](TebbyBot.py)
-
 **Telegram:** `@tebby_bot`
-### :thought_balloon: Background
+### Background
 Tebby started out as a light-hearted Telegram bot using [nickoala's](https://github.com/nickoala/telepot) Telepot for sending cats and dogs images to users.
 With the help of several useful APIs out there, this bot has become relatively useful while
 maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is casual and non-profit, I have no
 plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
 
-### :keyboard: List of User Commands
+### User Guide
 Updated as of 15th May 2020.
 
 Some commands require inputs, while others will have defaults. Most of the commands that require input of country or location will default to Singapore. Country codes follow [ISO 3166](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes). If API and Python libraries are not mentioned in the command description, then it most likely involves [Requests](https://requests.readthedocs.io/en/master/) and web scraping.
@@ -35,14 +33,7 @@ Command | Description | API used
 `/calc` | Calculates, find solutions, and evaluates query in text form | [WolframAlpha](https://products.wolframalpha.com/api/)
 `/plot` | Plots graph from given query in text form| [WolframAlpha](https://products.wolframalpha.com/api/)
 
-### :octocat: Recent Updates
+### Recent Updates
 - Added Wolfram Alpha features using its API, can solve and evaluate (`/calc`) or plot graphs (`/plot`).
 - Improved wikipedia commands, contains `/wiki` and `/wikilink` (or `/wlink`) with better formatting.
 - Added debug logger since the usage is getting bigger.
-
-### :microscope: TODO
-- Add a `/ask` which is similar to [Google's featured snippet](https://support.google.com/websearch/answer/9351707?p=featured_snippets&hl=en-SG&visit_id=637223398998406223-969856675&rd=1). I'm eyeing [DuckDuckGo's Instant Answer API](https://duckduckgo.com/api) too...<br>If successful, there may not be a need for `/google` or `/wiki`.
-- Find ways to make `/google` friendlier than just dumping urls to users.
-- Add `/forecast` for weather forecast, or add forecast to the current `/weather` command.
-- Make `/transit` more flexible and able to provide driving routes too.
-- Random generators; such as numbers, emojis, colours.
