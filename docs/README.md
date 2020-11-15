@@ -10,6 +10,8 @@ With the help of several useful APIs out there, this bot has become relatively u
 maintaining a good amount of casual fun. Currently, this bot's codes are being hosted by [PythonAnywhere](https://www.pythonanywhere.com) for free. Given the nature of being free, there are several limitations including a restricted list of websites that their platform can access. Since Tebby is casual and non-profit, I have no
 plans to switch over to a paid account. Send a `/help` to `@tebby_bot` to get started!
 
+![telegram](telegram.png)
+
 ### :keyboard: List of User Commands
 Updated as of 15th May 2020.
 
